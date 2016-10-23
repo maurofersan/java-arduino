@@ -50,6 +50,7 @@ public class InicioView {
 			private static final long serialVersionUID = 1L;
 
 			private Image imagen = new ImageIcon(getClass().getClassLoader().getResource("img/fondo1.png")).getImage();
+
 			@Override
 			public void paintChildren( Graphics g){
 				g.drawImage(imagen,0,0, getWidth(), getHeight(),this);

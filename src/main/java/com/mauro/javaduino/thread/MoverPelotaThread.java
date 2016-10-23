@@ -20,9 +20,10 @@ public class MoverPelotaThread extends Thread {
 		while (!Thread.currentThread().isInterrupted()) {
 			if (!isPaused) {
 				pelota.muevePelota(panel.getBounds());
+				//panel.repaint();
 				panel.paint(panel.getGraphics());
 				try {
-					Thread.sleep(15);
+					Thread.sleep(10);
 				} catch (InterruptedException e1) {
 					Thread.currentThread().interrupt();
 				}
@@ -36,6 +37,10 @@ public class MoverPelotaThread extends Thread {
 	
 	public void continuar() {
 		isPaused = false;
+	}
+
+	public boolean isPaused() {
+		return isPaused;
 	}
 
 }

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
@@ -20,6 +21,7 @@ import com.mauro.javaduino.thread.MoverPelotaThread;
 public class JuegoView {
 
 	protected JFrame frame;
+	private JPanel panelFondo;
 	private JPanel panel;
 	private JPanel panelLower;
 	private JButton btnSalir;
@@ -60,44 +62,50 @@ public class JuegoView {
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
 		frame.getContentPane().setLayout(null);
+		
+		panelFondo = new JPanel()  {
+			
+			
+		};
+		panelFondo.setBounds(0, 0, 844, 460);
+		panelFondo.setLayout(null);
+		frame.getContentPane().add(panelFondo);
 
 		panel = new JPanel() {
 
 			private static final long serialVersionUID = 1L;
-
+			
+			Image image = new ImageIcon(getClass().getClassLoader().getResource("img/fondoJuego472.png")).getImage();
+			
 			public void paintComponent(Graphics g) {
+				System.out.println("exec");
 				super.paintComponent(g);
+				
+				g.drawImage(image, 0, 0, null);
+
+//				setOpaque(false);
 				Graphics2D g2 = (Graphics2D) g;
 				if (pelota != null) {
 					g2.fill(pelota.getShade());
 				}
-				Rectangle2D rectangle = new Rectangle2D.Double(Rectangle.startX, 441, Rectangle.width,
-						Rectangle.height);
+				Rectangle2D rectangle = new Rectangle2D.Double(Rectangle.startX, 441, Rectangle.width, Rectangle.height);
 				g2.fill(rectangle);
+				
 			}
 		};
 		panel.setBounds(0, 0, 844, 460);
 		panel.setLayout(null);
+		panel.setOpaque(false);
 		frame.getContentPane().add(panel);
 
 		panelLower = new JPanel();
 		panelLower.setBounds(0, 460, 844, 112);
-		panelLower.setBackground(Color.CYAN);
+		panelLower.setBackground(new Color(135, 144, 23));
 		panelLower.setLayout(null);
 		frame.getContentPane().add(panelLower);
-		//jugar
-		JButton btnJugar = new JButton("Jugar");
-		btnJugar.setBounds(300, 37, 89, 23);
-		btnJugar.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				comienzaJuego();
-			}
-		});
-		panelLower.add(btnJugar);
 		// SALIR----------------------------------------------------------------------------------
-		btnSalir = new JButton("Salir");
-		btnSalir.setBounds(526, 37, 89, 23);
+		btnSalir = new JButton(new ImageIcon(getClass().getClassLoader().getResource("img/quit.png")));
+		btnSalir.setBounds(481, 22, 57, 57);
 		btnSalir.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
@@ -107,18 +115,18 @@ public class JuegoView {
 		});
 		panelLower.add(btnSalir);
 		//PAUSA-----------------------------------------------------------------------------------
-		btnPause = new JButton("Pause");
-		btnPause.setBounds(385, 37, 89, 23);
+		btnPause = new JButton();
+		btnPause.setIcon(new ImageIcon(getClass().getClassLoader().getResource("img/pause.png")));
+		btnPause.setBounds(319, 22, 57, 57);
 		btnPause.addActionListener(new ActionListener() {
-			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (btnPause.getText().equalsIgnoreCase("Pause")) {
-					hilo.pausar();
-					btnPause.setText("Continue");
-				} else {
+				if (hilo.isPaused()) {
 					hilo.continuar();
-					btnPause.setText("Pause");
+					btnPause.setIcon(new ImageIcon(getClass().getClassLoader().getResource("img/pause.png")));
+				} else {
+					hilo.pausar();
+					btnPause.setIcon(new ImageIcon(getClass().getClassLoader().getResource("img/continue.png")));
 				}
 			}
 		});

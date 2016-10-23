@@ -16,8 +16,7 @@ public class Pelota {
 		x += dx;
 		y += dy;
 
-		if ((y + TAMY >= limite.getMaxY() + Rectangle.height) && (x >= Rectangle.startX && x <= Rectangle.width + Rectangle.startX)) {
-//			y = limite.getMaxY() + Rectangle.height + TAMY;
+		if ((y + TAMY + Rectangle.height >= limite.getMaxY()) && (x >= Rectangle.startX && x <= Rectangle.width + Rectangle.startX)) {
 			dy = -dy;
 		}
 		if (x + TAMX >= limite.getMaxX()) {

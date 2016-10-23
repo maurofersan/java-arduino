@@ -76,15 +76,25 @@ public class JuegoView {
 				g2.fill(rectangle);
 			}
 		};
-		panel.setBounds(0, 0, 834, 460);
+		panel.setBounds(0, 0, 844, 460);
 		panel.setLayout(null);
 		frame.getContentPane().add(panel);
 
 		panelLower = new JPanel();
-		panelLower.setBounds(0, 460, 834, 102);
+		panelLower.setBounds(0, 460, 844, 112);
 		panelLower.setBackground(Color.CYAN);
 		panelLower.setLayout(null);
 		frame.getContentPane().add(panelLower);
+		//jugar
+		JButton btnJugar = new JButton("Jugar");
+		btnJugar.setBounds(300, 37, 89, 23);
+		btnJugar.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				comienzaJuego();
+			}
+		});
+		panelLower.add(btnJugar);
 		// SALIR----------------------------------------------------------------------------------
 		btnSalir = new JButton("Salir");
 		btnSalir.setBounds(526, 37, 89, 23);

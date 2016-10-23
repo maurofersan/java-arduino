@@ -22,7 +22,7 @@ public class MoverPelotaThread extends Thread {
 				pelota.muevePelota(panel.getBounds());
 				panel.paint(panel.getGraphics());
 				try {
-					Thread.sleep(4);
+					Thread.sleep(15);
 				} catch (InterruptedException e1) {
 					Thread.currentThread().interrupt();
 				}

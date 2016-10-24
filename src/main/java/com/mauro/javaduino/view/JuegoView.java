@@ -14,14 +14,15 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import com.mauro.javaduino.conection.ReaderWriterArduino;
 import com.mauro.javaduino.shape.Pelota;
 import com.mauro.javaduino.shape.Rectangle;
 import com.mauro.javaduino.thread.MoverPelotaThread;
+import com.mauro.utilitario.util.ConvertUtil;
 
 public class JuegoView {
 
 	protected JFrame frame;
-	private JPanel panelFondo;
 	private JPanel panel;
 	private JPanel panelLower;
 	private JButton btnSalir;
@@ -62,14 +63,6 @@ public class JuegoView {
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
 		frame.getContentPane().setLayout(null);
-		
-		panelFondo = new JPanel()  {
-			
-			
-		};
-		panelFondo.setBounds(0, 0, 844, 460);
-		panelFondo.setLayout(null);
-		frame.getContentPane().add(panelFondo);
 
 		panel = new JPanel() {
 
@@ -78,7 +71,6 @@ public class JuegoView {
 			Image image = new ImageIcon(getClass().getClassLoader().getResource("img/fondoJuego472.png")).getImage();
 			
 			public void paintComponent(Graphics g) {
-				System.out.println("exec");
 				super.paintComponent(g);
 				
 				g.drawImage(image, 0, 0, null);
@@ -109,8 +101,7 @@ public class JuegoView {
 		btnSalir.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				System.exit(0);
-				frame.dispose();
+				quit();
 			}
 		});
 		panelLower.add(btnSalir);
@@ -121,13 +112,7 @@ public class JuegoView {
 		btnPause.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (hilo.isPaused()) {
-					hilo.continuar();
-					btnPause.setIcon(new ImageIcon(getClass().getClassLoader().getResource("img/pause.png")));
-				} else {
-					hilo.pausar();
-					btnPause.setIcon(new ImageIcon(getClass().getClassLoader().getResource("img/continue.png")));
-				}
+				pauseToggle();
 			}
 		});
 		panelLower.add(btnPause);
@@ -141,8 +126,50 @@ public class JuegoView {
 		hilo = new MoverPelotaThread(pelota, panel);
 		hilo.start();
 		
+		Thread hiloBotones = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				ReaderWriterArduino read = ReaderWriterArduino.getInstance();
+				while (true) {
+					String ultimoDato = read.getUltimoDato("PAUSE_PLS");
+					Integer dato = ConvertUtil.toInteger(ultimoDato, 0);
+					if (dato == 1) {
+						pauseToggle();
+						try {
+							Thread.sleep(400);
+						} catch (InterruptedException e1) {
+							Thread.currentThread().interrupt();
+						}
+						read.resetUltimoDato("PAUSE_PLS");
+					}
+					ultimoDato = read.getUltimoDato("QUIT_PLS");
+					dato = ConvertUtil.toInteger(ultimoDato, 0);
+					if (dato == 1) {
+						quit();
+						break;
+					}
+				}
+			}
+		});
+		hiloBotones.start();
+		
 		Thread hiloRectangle = new Thread(new Rectangle());
 		hiloRectangle.start();
 	}
 
+	private void pauseToggle() {
+		if (hilo.isPaused()) {
+			hilo.continuar();
+			btnPause.setIcon(new ImageIcon(getClass().getClassLoader().getResource("img/pause.png")));
+		} else {
+			hilo.pausar();
+			btnPause.setIcon(new ImageIcon(getClass().getClassLoader().getResource("img/continue.png")));
+		}
+	}
+	
+	private void quit() {
+		System.exit(0);
+		frame.dispose();
+	}
+	
 }

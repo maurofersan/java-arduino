@@ -8,18 +8,17 @@ public class Rectangle implements Runnable {
 	public static double startX = 380;
 	public static double width = 150;
 	public static double height = 15;
-	private ReaderWriterArduino lector = new ReaderWriterArduino();
 
 	@Override
 	public void run() {
-		lector.inicializarConexion();
-		lector.iniciarLectura();
+		ReaderWriterArduino lector = ReaderWriterArduino.getInstance();
 		while (true) {
 			try {
-				Double dato = ConvertUtil.toDouble(lector.getUltimoDato(), 566.0);
-//				System.out.println("'" + lector.getUltimoDato() + "'");
+				String ultimoDato = lector.getUltimoDato("MOV_PTN");
+				Double dato = ConvertUtil.toDouble(ultimoDato, 566.0);
+				// System.out.println("'" + lector.getUltimoDato() + "'");
 				startX = changeInterval(dato, 0, 1023, 0, 688);
-				System.out.println(startX);
+				// System.out.println(startX);
 				Thread.sleep(500);
 			} catch (Exception e) {
 				e.printStackTrace();

@@ -11,6 +11,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 import javax.swing.JLabel;
+
+import com.mauro.javaduino.conection.ReaderWriterArduino;
+import com.mauro.utilitario.util.ConvertUtil;
+
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
 
@@ -44,16 +48,16 @@ public class InicioView {
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
 		frame.getContentPane().setLayout(null);
-		
-		desktop = new JDesktopPane(){
+
+		desktop = new JDesktopPane() {
 
 			private static final long serialVersionUID = 1L;
 
 			private Image imagen = new ImageIcon(getClass().getClassLoader().getResource("img/fondo1.png")).getImage();
 
 			@Override
-			public void paintChildren( Graphics g){
-				g.drawImage(imagen,0,0, getWidth(), getHeight(),this);
+			public void paintChildren(Graphics g) {
+				g.drawImage(imagen, 0, 0, getWidth(), getHeight(), this);
 				setOpaque(true);
 				super.paintChildren(g);
 			}
@@ -67,7 +71,7 @@ public class InicioView {
 		lblArduino = new JLabel(new ImageIcon(getClass().getClassLoader().getResource("img/arduino.png")));
 		lblArduino.setBounds(335, 178, 157, 165);
 		frame.getContentPane().add(lblArduino);
-		
+
 		lblLogo = new JLabel(new ImageIcon(getClass().getClassLoader().getResource("img/arduino2.png")));
 		lblLogo.setBounds(517, 83, 128, 140);
 		frame.getContentPane().add(lblLogo);
@@ -76,17 +80,37 @@ public class InicioView {
 		btnPlay.setFont(new Font("Play", Font.ITALIC, 30));
 		btnPlay.setBounds(335, 412, 165, 73);
 		btnPlay.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JuegoView view = JuegoView.getInstance();
-				frame.dispose();
-				view.frame.setVisible(true);
-
-				view.comienzaJuego();
+				play();
 			}
 		});
 		frame.getContentPane().add(btnPlay);
+		
+		Thread hiloInicio = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				ReaderWriterArduino read = ReaderWriterArduino.getInstance();
+				while (true) {
+					String ultimoDato = read.getUltimoDato("PLAY_PLS");
+					Integer dato = ConvertUtil.toInteger(ultimoDato, 0);
+					if (dato == 1) {
+						play();
+						break;
+					}
+				}
+			}
+		});
+		hiloInicio.start();
 
+	}
+
+	private void play() {
+		System.out.println("Play...");
+		JuegoView view = JuegoView.getInstance();
+		frame.dispose();
+		view.frame.setVisible(true);
+
+		view.comienzaJuego();
 	}
 }

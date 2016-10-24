@@ -4,22 +4,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JOptionPane;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 
 public class ReaderWriterArduino {
-
+	
     private final int TIME_OUT = 2000; //Milisegundos
     private final int DATA_RATE = 9600;
     //variables de conexion
     private SerialPort serialPort;
     private final String PUERTO = "COM3";
-    private OutputStream output = null;
-    private InputStream input = null;
-    
+    private OutputStream output;
+    private InputStream input;
     private String ultimoDato;
+    private Map<String, String> ultimoDatoPorPrefijo = new ConcurrentHashMap<>();
+    
+    private static ReaderWriterArduino instance;
 
     public void inicializarConexion() {
         CommPortIdentifier puertoID = null;
@@ -41,6 +45,7 @@ public class ReaderWriterArduino {
             output = serialPort.getOutputStream();
             input = serialPort.getInputStream();
         } catch (Exception e) {
+        	e.printStackTrace();
             mostrarError(e.getMessage());
         }
     }
@@ -49,6 +54,7 @@ public class ReaderWriterArduino {
         try {
             output.write(dato.getBytes());
         } catch (Exception e) {
+        	e.printStackTrace();
             mostrarError("Error al enviar datos");
         }
     }
@@ -58,7 +64,7 @@ public class ReaderWriterArduino {
         try {
             while (true) {
                 int caracterInt = input.read();
-                System.out.println("Recibido el dato.");
+
                 if (caracterInt == -1) {
                     continue;
                 }
@@ -67,6 +73,15 @@ public class ReaderWriterArduino {
                         continue;
                     }
                     ultimoDato = resultado;
+
+                    String[] splitedData = ultimoDato.split("\\|");
+                    String key = splitedData[0];
+                    String value =  splitedData[1];
+                    String currentValue = ultimoDatoPorPrefijo.get(key);
+                    if (!value.equals(currentValue)) {
+                    	ultimoDatoPorPrefijo.put(key, value);
+                    }
+
                     resultado = "";
                     continue;
                 }
@@ -83,6 +98,14 @@ public class ReaderWriterArduino {
     
     public String getUltimoDato() {
         return ultimoDato;
+    }
+    
+    public String getUltimoDato(String prefijo) {
+        return ultimoDatoPorPrefijo.get(prefijo);
+    }
+
+    public String resetUltimoDato(String prefijo) {
+        return ultimoDatoPorPrefijo.remove(prefijo);
     }
 
     public void iniciarLectura() {
@@ -102,6 +125,33 @@ public class ReaderWriterArduino {
 //            }
 //        }.start();
     }
+    
+    public void close() {
+    	try {
+			if (input != null) {
+				input.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	try {
+			if (output != null) {
+				output.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    }
+    
+    public static ReaderWriterArduino getInstance() {
+    	if (instance == null) {
+    		instance = new ReaderWriterArduino();
+    		instance.inicializarConexion();
+    		instance.iniciarLectura();
+    	}
+    	return instance;
+    }
+
 }
 
 
